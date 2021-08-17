@@ -1,3 +1,5 @@
+rt_AF 	node-exclusive 	72 	8 	480 	34401 	3.00
+rt_AG.small 	node-sharing-with-gpu 	9 	1 	60 	390 	0.50
 rt_F 	node-exclusive 	40 	4 	360 	1440 	1.00
 rt_G.large 	node-sharing-with-gpu 	20 	4 	240 	720 	0.90
 rt_G.small 	node-sharing-with-gpu 	5 	1 	60 	180 	0.30
