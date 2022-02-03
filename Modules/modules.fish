@@ -19,6 +19,7 @@ end
 # define module command and surrounding initial environment (default value
 # for MODULESHOME, MODULEPATH, LOADEDMODULES and parse of init/.modulespath)
 eval $_mlre /usr/bin/tclsh $HOME/abci-utils/Modules/modulecmd.tcl fish autoinit | source -
+# TODO: consider calling this file instead
 
 # clean temp variables used to setup quarantine
 set -e _mlre; set -e _mlv; set -e _mlrv;

@@ -28,32 +28,71 @@ This enables you to `sftp` into ABCI with no problems, and also to execute bash 
 
 To install these `abci-utils` simply run `bash setup.sh`, which will add symlinks to the fish `functions` and `complete` folders, as well as append some content to the `config.fish` file so that the functions (and their tab completions) described below are auto-loaded and available everywhere.
 
+## Configuration
+
+First, create the following file `~/.groups` as add the following contents:
+
+```bash
+<group_id> <group_name>
+...
+```
+Where `<group_id>` is the, and `<group_name>` is an alias or nickname you wish to give to the group. Names can only contain letter, numbers and undeerscores. Though creating this file is not necessary, it will improve the completions offered by fish with using the commands below.
+
+Also, create the folder `~/preambles` and add your preamble files to it. Each preable file is used to declare initial configuations when using the `submit-job` command. For example, you might create a file called "cuda10" with the following contents:
+
+```bash
+source /etc/profile.d/modules.sh
+
+module load cuda/10.1/10.1.243
+module load cudnn/7.6/7.6.5
+module load nccl/2.6/2.6.4-1
+module load gcc/7.4.0
+module load openmpi
+
+export CUDA_HOME=/apps/cuda/10.1.243
+export MKL_SERVICE_FORCE_INTEL=GNU
+export MKL_THREADING_LAYER=1
+```
+This preamble will later be available with the provided name when you submit a job using `submit-job`.
+
 ## Features
 
-### 1. The `$GROUPS` variable
+### 1. The group variables
 
-An environment variable named `$GROUPS`, which is created automatically upon login, and contains the names of the groups your user belongs to, based on the output of `check_point`. 
+An environment variable named `$GROUPS` is created automatically upon login, and contains the ids of the groups your user belongs to, based on the output of `check_point` Additionally, if you have created and populated the file `~/groups`, a global variable named after each group will be created, each one containing the id of the respective group.
 
 ### 2. Integration with the `module` command
 
 We have added ad-hoc integration for `fish` with the the `module` command, which was not provided by ABCI. You can test this integration by typing `module` and hitting tab.
 
-### 3. Executing Jobs given a job file using `exec-job`
-
-To keep things tidy, we have a system for running batch jobs. All you have to do is to place your batch job scripts on the `~/jobs` folder (add them as files with no extension) , and ``exec-job` will automatically detect them. 
-```bash
-exec-job -g <group> -r <resource> -n <nodes> -j <job>
-```
-The command will use `qsub` to submit the job described in the file `~/jobs/job`, using the specified group, resource and number of nodes. Logs will be written to the `$HOME/jobs/logs/<job>/` folder. Remember that there are 4 GPUs per node!
-
 ### 3. Launching interactive sessions with `request-gpus`
 
+We have added a new command for requesting interactive nodes, as follows.
 ```bash
 request-gpus -g <group> -r <resource> -t <time>
 ```
 This will attempt to start an interactive session using `qrsh` for the specified time, which should be in the format of H:MM:SS.  
 
-### 4. Checking node availability with `avail-node-count`
+### 4. Executing Jobs using `submit-job`
+
+A shortcut command to just run a regular script as a job with the given configuration. Usage is as follows (all parameters are required).
+
+```bash
+submit-job -g <group> -r <resource> -q <quantity> -t <time> -p <preample> -n <name> -c  "command/to/execute"
+```
+This command will create a temporary file where the contents of your selected preamble and command will be placed. A header for this file is created based on your provided `qsub` parameters, and this script then is passed as an argument to the `qsub` command to run as a batch job with the provided parameters. By default, the standard output and standard error are merged together, and this is streamed to a file in the same folder where you launched the command, following the naming convention `<name>.o<job-id>`.
+
+### 5. Deleting Jobs with `delete-job`
+
+A better interface for the the `qdel` command, with fish completions. Use as follows:
+
+```bash
+delete-job -j <job>
+```
+
+Where `<job>` is the job-id provided by ABCI. 
+
+### 6. Checking node availability with `avail-node-count`
 
 ```bash
 $ avail-node-count
@@ -61,9 +100,21 @@ $ avail-node-count
 ```
 The `avail-node-count` functions prints the amount of available nodes (rt_F's - 4 V100 16GB GPUs) on the cluster.
 
+### 5. Better Completions with fish
+
+I have added better suggestions to the following commands:
+- `qrsh`: completions for the `-g <group>` and `-l <resource>` options.
+- `qsub`: completions for the `-g <group>` and `-l <resource>` options.
+- `qdel`: automatically searches for running jobs and autocompletes with their ids.
+
+
 ## Important Tips (that they don't tell you)
 
 1. If you are saving checkpoints when running a job, make sure to run a `watch ls -lah` (in tmux) in that directory. Sometimes, if you don't do this the checkpoint may take forever to finish saving (presumably being put as a lower priority by the system) and you will end up wasting a lot of points (speaking from experience). 
 
 ## Useful Links
 - https://cstmize.hatenablog.jp/entry/2019/04/18/ABCI%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%81%AE%E4%BD%BF%E3%81%84%E6%96%B9
+
+- [Enviroment Modules](http://modules.sourceforge.net/) [On Github](https://github.com/cea-hpc/modules/tree/d94e637a6a9902b59fb19d6067fb16522d220792)
+
+-

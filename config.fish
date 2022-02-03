@@ -12,5 +12,12 @@ else
     set -x GROUPS
 end
 
+if test -e "$HOME/.groups"
+    cat "$HOME/.groups" | while read -l -a gline
+        set -x "$gline[2]" "$gline[1]"
+    end
+end
+
+
 set -x CUDA_HOME "/apps/cuda/10.2.89/"
 set -x MKL_SERVICE_FORCE_INTEL 1
