@@ -12,7 +12,7 @@ conda activate default
 conda install fish
 ```
 
-Then, you can load `fish` at the end of your `.profile` file, which could look as follows (assuming that you used miniconda and installed it in your home folder).
+Then, you can load `fish` at the end of your `~/.profile` file, which could look as follows (assuming that you used miniconda and installed it in your home folder).
 
 ```bash
 if [ -f ~/.bashrc ]; then
@@ -24,7 +24,7 @@ conda activate default
 export SHELL=$HOME/miniconda3/envs/default/bin/fish
 [[ $- == *i*  ]] && exec $SHELL -l || :
 ```
-This enables you to `sftp` into ABCI with no problems, and also to execute bash or sh scripts using the syntax `bash /path/to/script.sh` (this is possible because the `.profile` file is only parsed when starting a new login interactive session).
+This enables you to `sftp` into ABCI with no problems, and also to execute bash or sh scripts using the syntax `bash /path/to/script.sh` (this is possible because the `~/.profile` file is only parsed when starting a new login interactive session).
 
 To install these `abci-utils` simply run `bash setup.sh`, which will add symlinks to the fish `functions` and `complete` folders, as well as append some content to the `config.fish` file so that the functions (and their tab completions) described below are auto-loaded and available everywhere.
 
@@ -36,9 +36,9 @@ First, create the following file `~/.groups` as add the following contents:
 <group_id> <group_name>
 ...
 ```
-Where `<group_id>` is the, and `<group_name>` is an alias or nickname you wish to give to the group. Names can only contain letter, numbers and undeerscores. Though creating this file is not necessary, it will improve the completions offered by fish with using the commands below.
+Where `<group_id>` is the unique if for a group your user belongs to, and `<group_name>` is an alias or nickname you wish to give to the group. Names can only contain letters, numbers and underscores. Though creating this file is not necessary, it will improve the completions offered by fish with using the commands below.
 
-Also, create the folder `~/preambles` and add your preamble files to it. Each preable file is used to declare initial configuations when using the `submit-job` command. For example, you might create a file called "cuda10" with the following contents:
+Also, create the folder `~/preambles` and add your preamble files to it. Each preamble file is used to declare initial configurations when using the `submit-job` command. For example, you might create a file called "cuda10" with the following contents:
 
 ```bash
 source /etc/profile.d/modules.sh
@@ -78,7 +78,7 @@ This will attempt to start an interactive session using `qrsh` for the specified
 A shortcut command to just run a regular script as a job with the given configuration. Usage is as follows (all parameters are required).
 
 ```bash
-submit-job -g <group> -r <resource> -q <quantity> -t <time> -p <preample> -n <name> -c  "command/to/execute"
+submit-job -g <group> -r <resource> -q <quantity> -t <time> -p <preamble> -n <name> -c  "command/to/execute"
 ```
 This command will create a temporary file where the contents of your selected preamble and command will be placed. A header for this file is created based on your provided `qsub` parameters, and this script then is passed as an argument to the `qsub` command to run as a batch job with the provided parameters. By default, the standard output and standard error are merged together, and this is streamed to a file in the same folder where you launched the command, following the naming convention `<name>.o<job-id>`.
 
