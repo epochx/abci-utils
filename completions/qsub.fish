@@ -1,7 +1,7 @@
 set -l script_dir (realpath (dirname (status -f)))
 
 cat "$script_dir"/resource_types.txt | while read -l -a rline
-    complete -f -c qsub -s l -o r -l -a "$rline[1]=" -d "$rline[2]"
+    complete -f -c qsub -s l -o l -a "$rline[1]=" -d "$rline[2]"
 end
 
 if test -e "$HOME/.groups"

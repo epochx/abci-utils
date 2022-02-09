@@ -30,15 +30,15 @@ To install these `abci-utils` simply run `bash setup.sh`, which will add symlink
 
 ## Configuration
 
-First, create the following file `~/.groups` as add the following contents:
+First, create the following file `~/.groups` and add the following contents:
 
 ```bash
 <group_id> <group_name>
 ...
 ```
-Where `<group_id>` is the unique if for a group your user belongs to, and `<group_name>` is an alias or nickname you wish to give to the group. Names can only contain letters, numbers and underscores. Though creating this file is not necessary, it will improve the completions offered by fish with using the commands below.
+Where `<group_id>` is the unique ID for a group your user belongs to, and `<group_name>` is an alias or nickname you wish to give to the group. Please keep in mind that **names can only contain letters, numbers and underscores**. Though creating this file is not necessary, it will improve the completions offered by fish when using the commands below.
 
-Also, create the folder `~/preambles` and add your preamble files to it. Each preamble file is used to declare initial configurations when using the `submit-job` command. For example, you might create a file called "cuda10" with the following contents:
+Also, create the folder `~/preambles` and add your preamble files to it. Each preamble file is used to declare initial configurations for when using the `submit-job` command. For example, you might create a file called "cuda10" with the following contents:
 
 ```bash
 source /etc/profile.d/modules.sh
@@ -53,13 +53,13 @@ export CUDA_HOME=/apps/cuda/10.1.243
 export MKL_SERVICE_FORCE_INTEL=GNU
 export MKL_THREADING_LAYER=1
 ```
-This preamble will later be available with the provided name when you submit a job using `submit-job`.
+Once created, a preamble named after the file (in this case, "cuda10") will be available in the auto-completions when you use the `submit-job` command.
 
 ## Features
 
 ### 1. The group variables
 
-An environment variable named `$GROUPS` is created automatically upon login, and contains the ids of the groups your user belongs to, based on the output of `check_point` Additionally, if you have created and populated the file `~/groups`, a global variable named after each group will be created, each one containing the id of the respective group.
+An environment variable named `$GROUPS` is created automatically upon login, containing the IDs of the groups your user belongs to, which are obtained from the output of `check_point`. Additionally, if you have created and populated the file `~/groups`, a global variable named after each group will be created, each one containing the ID of the respective group. This is useful for accessing storage folders for each group in an easy manner. Simply type `cd /groups/$<group_name>`.
 
 ### 2. Integration with the `module` command
 
@@ -78,9 +78,9 @@ This will attempt to start an interactive session using `qrsh` for the specified
 A shortcut command to just run a regular script as a job with the given configuration. Usage is as follows (all parameters are required).
 
 ```bash
-submit-job -g <group> -r <resource> -q <quantity> -t <time> -p <preamble> -n <name> -c  "command/to/execute"
+submit-job -g <group> -r <resource> -q <quantity> -t <time> -p <preamble> -n <name> -c "command/to/execute"
 ```
-This command will create a temporary file where the contents of your selected preamble and command will be placed. A header for this file is created based on your provided `qsub` parameters, and this script then is passed as an argument to the `qsub` command to run as a batch job with the provided parameters. By default, the standard output and standard error are merged together, and this is streamed to a file in the same folder where you launched the command, following the naming convention `<name>.o<job-id>`.
+This command will create a temporary file where the contents of your selected preamble and command will be placed. A header for this file is created based on your provided `qsub` parameters, and this script then is passed as an argument to the `qsub` command to run as a batch job with the provided parameters. By default, the standard output and standard error are merged together, and this is streamed to a file in the same folder where you launched the command, following the naming convention `<name>.o<job-id>`. 
 
 ### 5. Deleting Jobs with `delete-job`
 
@@ -100,9 +100,9 @@ $ avail-node-count
 ```
 The `avail-node-count` functions prints the amount of available nodes (rt_F's - 4 V100 16GB GPUs) on the cluster.
 
-### 5. Better Completions with fish
+### 5. Better Completions for default commands
 
-I have added better suggestions to the following commands:
+I have added better completions to the following ABCI commands:
 - `qrsh`: completions for the `-g <group>` and `-l <resource>` options.
 - `qsub`: completions for the `-g <group>` and `-l <resource>` options.
 - `qdel`: automatically searches for running jobs and autocompletes with their ids.
