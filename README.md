@@ -7,7 +7,7 @@ Utils that are useful for abci, translated to fish shell (note that this is comp
 ABCI does not natively support a shell other than bash or zsh, so we suggest you install fish using conda. For example:
 
 ```bash
-conda create default python=3.8
+conda create -n default python=3.8
 conda activate default 
 conda install fish
 ```
