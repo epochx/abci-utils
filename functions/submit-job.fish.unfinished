@@ -1,24 +1,24 @@
 function submit-job -d "Run a command as a job using qsub"
    # set group
-    set -l options (fish_opt -s g -l group --required-val)
+    set -l options (fish_opt --short=g --long=group --required-val)
     
     # set resource
-    set options $options (fish_opt -s r -l resource --required-val)
+    set options $options (fish_opt --short=r --long=resource --required-val)
 
     # set resource quantity
-    set options $options (fish_opt -s q -l quantity --required-val)
+    set options $options (fish_opt --short=q --long=quantity --required-val)
 
     # set time
-    set options $options (fish_opt -s t -l time --required-val)
+    set options $options (fish_opt --short=t --long=time --required-val)
 
     # set preamble
-    set options $options (fish_opt -s p -l preamble --required-val)
+    set options $options (fish_opt --short=p --long=preamble --required-val)
 
     # set command
-    set options $options (fish_opt -s c -l command --required-val)
+    set options $options (fish_opt --short=c --long=command --required-val)
 
     # set name
-    set options $options (fish_opt -s n -l name --required-val)
+    set options $options (fish_opt --short=n --long=name --required-val)
 
     argparse $options -- $argv
 
@@ -29,7 +29,6 @@ function submit-job -d "Run a command as a job using qsub"
     echo "#\$ -l $_flag_resource=$_flag_quantity" >> $filename
     echo "#\$ -l h_rt=$_flag_time" >> $filename 
     echo "#\$ -j y" >> $filename 
-    echo "#\$ -cwd" >> $filename 
     echo "#\$ -m ea" >> $filename  
     echo "" >> $filename
     cat "$HOME/preambles/$_flag_preamble" >> $filename

@@ -1,8 +1,9 @@
+#SOURCE: https://github.com/envmodules/modules/blob/main/init/fish_completion
 #completion for modules
 
 function __fish_module_no_subcommand --description 'Test if modulecmd has yet to be given the subcommand'
    for i in (commandline -opc)
-      if contains -- $i add load rm unload swap switch show display list avail is-loaded is-saved is-used is-avail info-loaded aliases use unuse refresh reload purge source whatis apropos keyword search test save restore saverm saveshow savelist initadd initprepend initrm initswitch initlist initclear path paths append-path prepend-path remove-path
+      if contains -- $i add add-any load load-any try-add try-load rm remove del unload swap switch show display lint list avail is-loaded is-saved is-used is-avail info-loaded aliases use unuse refresh reload purge source whatis apropos keyword search test save reset restore saverm saveshow savelist stash stashclear stashlist stashpop stashrm stashshow initadd initprepend initrm initswitch initlist initclear path paths append-path prepend-path remove-path clear config sh-to-mod edit state mod-to-sh cachebuild cacheclear
          return 1
       end
    end
@@ -11,7 +12,7 @@ end
 
 function __fish_module_use_avail --description 'Test if module command should have available packages as potential completion'
    for i in (commandline -opc)
-      if contains -- $i help add load swap switch show display list avail is-loaded is-avail info-loaded source whatis test initadd initprepend path paths
+      if contains -- $i help add add-any load load-any try-add try-load swap switch show display avail is-loaded is-avail info-loaded whatis test initadd initprepend path paths edit lint mod-to-sh
          return 0
       end
    end
@@ -20,7 +21,7 @@ end
 
 function __fish_module_use_list --description 'Test if module command should have loaded packages as potential completion'
    for i in (commandline -opc)
-      if contains -- $i swap switch unload
+      if contains -- $i swap switch rm remove del unload
          return 0
       end
    end
@@ -45,29 +46,47 @@ function __fish_module_use_savelist --description 'Test if module command should
    return 1
 end
 
-complete -c module -n '__fish_module_use_avail' -f -a "(module avail -t ^&1 | sed '\
-   /^-\+/d; /^\s*\$/d; \
-   /->.*\$/d; \
-   /:\$/d; \
-   /:ERROR:/d; \
-   s#^\(.*\)/\(.\+\)(.*default.*)#\1\n\1\/\2#; \
-   s#(.*)\$##g; \
-   s#\s*\$##g; \
-   s#/*\$##g;')"
-complete -c module -n '__fish_module_use_list' -f -a "(module list -t ^&1 | sed '\
-   /Currently Loaded Modulefiles:\$/d;')"
-complete -c module -n '__fish_module_use_initlist' -f -a "(module initlist ^&1 | sed '\
+function __fish_module_use_stashlist --description 'Test if module command should have stash collections as potential completion'
+   for i in (commandline -opc)
+      if contains -- $i stashpop stashrm stashshow
+         return 0
+      end
+   end
+   return 1
+end
+
+function __fish_module_use_config --description 'Test if module command should have configuration parameters as potential completion'
+   for i in (commandline -opc)
+      if contains -- $i config
+         return 0
+      end
+   end
+   return 1
+end
+
+complete -c module -n '__fish_module_use_avail' -f -a "(module avail --color=never -s -t -S --no-indepth -o 'alias:indesym' (commandline -ct) 2>&1)"
+complete -c module -n '__fish_module_use_list' -f -a "(module list --color=never -s -t -o '' 2>&1)"
+complete -c module -n '__fish_module_use_initlist' -f -a "(module initlist --color=never -s 2>&1 | sed '\
    / loads modules:\$/d;')"
-complete -c module -n '__fish_module_use_savelist' -f -a "(module savelist -t ^&1 | sed '\
+complete -c module -n '__fish_module_use_savelist' -f -a "(module savelist --color=never -s -t 2>&1 | sed '\
+   /No named collection\.\$/d; \
    /Named collection list\$/d; \
    /:\$/d; \
    /:ERROR:/d;')"
+complete -c module -n '__fish_module_use_stashlist' -f -a "(module stashlist --color=never -s -t 2>&1 | sed '\
+   /No stash collection\.\$/d; \
+   /Stash collection list\$/d; \
+   /:\$/d; \
+   /:ERROR:/d;')"
+complete -c module -n '__fish_module_use_config' -f -a "--dump-state --reset abort_on_error advanced_version_spec auto_handling avail_indepth avail_output avail_terse_output cache_buffer_bytes cache_expiry_secs collection_pin_version collection_pin_tag collection_target color colors conflict_unload contact editor extended_default extra_siteconfig hide_auto_loaded home icase ignore_cache ignore_user_rc implicit_default implicit_requirement list_output list_terse_output locked_configs logged_events logger mcookie_check mcookie_version_check ml nearly_forbidden_days pager protected_envvars quarantine_support rcfile redirect_output reset_target_state run_quarantine search_match set_shell_startup shells_with_ksh_fpath silent_shell_debug source_cache sticky_purge tag_abbrev tag_color_name tcl_linter term_background term_width unique_name_loaded unload_match_order variant_shortcut verbosity wa_277"
 
 complete -f -n '__fish_module_no_subcommand' -c module -a 'help' --description 'Print this or modulefile(s) help info'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'avail' --description 'List all or matching available modules'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'is-avail' --description 'Is any of the modulefile(s) available'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'add load' --description 'Load modulefile(s)'
-complete -f -n '__fish_module_no_subcommand' -c module -a 'rm unload' --description 'Remove modulefile(s)'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'add-any load-any' --description 'Load first available modulefile in list'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'try-add try-load' --description 'Attempt to load modulefile(s), no complain'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'rm remove del unload' --description 'Remove modulefile(s)'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'swap switch' --description 'Unload mod1 and load mod2'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'show display' --description 'Display information about modulefile(s)'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'list' --description 'List loaded modules'
@@ -77,7 +96,8 @@ complete -f -n '__fish_module_no_subcommand' -c module -a 'aliases' --descriptio
 complete -f -n '__fish_module_no_subcommand' -c module -a 'use' --description 'Add dir(s) to MODULEPATH variable'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'unuse' --description 'Remove dir(s) from MODULEPATH variable'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'is-used' --description 'Is any of the dir(s) enabled in MODULEPATH'
-complete -f -n '__fish_module_no_subcommand' -c module -a 'refresh reload' --description 'Unload then load all loaded modulefiles'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'refresh' --description 'Refresh volatile components of loaded modulefiles'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'reload' --description 'Unload then load all loaded modulefiles'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'purge' --description 'Unload all loaded modulefiles'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'source' --description 'Execute scriptfile(s)'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'whatis' --description 'Print whatis information of modulefile(s)'
@@ -100,10 +120,51 @@ complete -f -n '__fish_module_no_subcommand' -c module -a 'paths' --description 
 complete -f -n '__fish_module_no_subcommand' -c module -a 'append-path' --description 'Append value to environment variable'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'prepend-path' --description 'Prepend value to environment variable'
 complete -f -n '__fish_module_no_subcommand' -c module -a 'remove-path' --description 'Remove value from environment variable'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'clear' --description 'Reset Modules-specific runtime information'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'config' --description 'Display or set Modules configuration'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'sh-to-mod' --description 'Make modulefile from script env changes'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'edit' --description 'Open modulefile in editor'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'state' --description 'Display Modules state'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'lint' --description 'Check syntax of modulefile'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'mod-to-sh' --description 'Make shell code from modulefile env changes'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'reset' --description 'Restore initial environment'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'stash' --description 'Save current environment and reset'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'stashclear' --description 'Remove all stash collections'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'stashlist' --description 'List all stash collections'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'stashpop' --description 'Restore then remove stash collection'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'stashrm' --description 'Remove stash collection'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'stashshow' --description 'Display information about stash collection'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'cachebuild' --description 'Create cache file for modulepath(s)'
+complete -f -n '__fish_module_no_subcommand' -c module -a 'cacheclear' --description 'Delete cache file in enabled modulepath(s)'
 
 complete -c module -s V -l version --description 'Module version'
+complete -c module -s T -l trace --description 'Enable trace and debug messages'
 complete -c module -s D -l debug --description 'Enable debug messages'
+complete -c module -s v -l verbose --description 'Enable verbose messages'
+complete -c module -s s -l silent --description 'Turn off error, warning and informational messages'
+complete -c module -s i -l icase --description 'Case insensitive match'
 complete -c module -s t -l terse --description 'Display output in terse format'
 complete -c module -s l -l long --description 'Display output in long format'
+complete -c module -s j -l json --description 'Display output in JSON format'
+complete -c module -s o -l output --description 'Define elements to output in addition to module names'
+complete -c module -l output= --description 'Define elements to output in addition to module names'
+complete -c module -l tag --description 'Apply tag to loading module'
+complete -c module -l tag= --description 'Apply tag to loading module'
+complete -c module -s a -l all --description 'Include hidden modules in search'
 complete -c module -s d -l default --description 'Only show default versions available'
 complete -c module -s L -l latest --description 'Only show latest versions available'
+complete -c module -s S -l starts-with --description 'Search modules whose name begins with query string'
+complete -c module -s C -l contains --description 'Search modules whose name contains query string'
+complete -c module -l indepth --description 'Perform recursive avail search'
+complete -c module -l no-indepth --description 'Perform non-recursive avail search'
+complete -c module -l paginate --description 'Pipe mesg output into a pager if stream attached to terminal'
+complete -c module -l no-pager --description 'Do not pipe message output into a pager'
+complete -c module -l auto --description 'Enable automated module handling mode'
+complete -c module -l no-auto --description 'Disable automated module handling mode'
+complete -c module -s f -l force --description 'By-pass dependency consistency or confirmation dialog'
+complete -c module -l color --description 'Colorize the output'
+complete -c module -l color= --description 'Colorize the output'
+complete -c module -s w -l width --description 'Set output width'
+complete -c module -l width= --description 'Set output width'
+complete -c module -l ignore-cache --description 'Ignore module cache'
+complete -c module -l ignore-user-rc --description 'Skip evaluation of user-specific module rc file'

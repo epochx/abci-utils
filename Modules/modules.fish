@@ -1,46 +1,33 @@
-# define modules runtine quarantine configuration
-set -xg MODULES_RUN_QUARANTINE 'LD_LIBRARY_PATH'
+#SOURCE: https://github.com/envmodules/modules/blob/main/init/fish_completion
+# define modules runtime quarantine configuration
+# @setquarvars@set -xg MODULES_RUN_QUARANTINE '@RUN_QUARANTINE@'
+# @setquarvars@@set -xg RUNENV_VAR 'RUNENV_VAL'@
+# @notsetquarvars@#set -xg MODULES_RUN_QUARANTINE 'ENVVARNAME'
+# @notsetquarvars@
 
 # setup quarantine if defined
 set _mlre '';
 for _mlv in (string split ' ' $MODULES_RUN_QUARANTINE)
   if string match -r '^[A-Za-z_][A-Za-z0-9_]*$' $_mlv >/dev/null
      if set -q $_mlv
-        set _mlre $_mlre$_mlv"_modquar='$$_mlv' "
+        set _mlre $_mlre"__MODULES_QUAR_"$_mlv"='$$_mlv' "
      end
      set _mlrv "MODULES_RUNENV_$_mlv"
      set _mlre "$_mlre$_mlv='$$_mlrv' "
   end
 end
 if [ -n "$_mlre" ]
-  set _mlre "env $_mlre"
+  set _mlre "env $_mlre __MODULES_QUARANTINE_SET=1"
 end
 
 # define module command and surrounding initial environment (default value
-# for MODULESHOME, MODULEPATH, LOADEDMODULES and parse of init/.modulespath)
-eval $_mlre /usr/bin/tclsh $HOME/abci-utils/Modules/modulecmd.tcl fish autoinit | source -
-# TODO: consider calling this file instead
+# for MODULESHOME, MODULEPATH, LOADEDMODULES and parse of init config files)
+# eval $_mlre @TCLSH@ \'@libexecdir@/modulecmd.tcl\' fish autoinit | source -
+
+# replace the above commented lines which depend on the envmodules makefile
+# hardcode path to tclsh binaries and Modules installation path
+set TCLSH (which tclsh)
+eval $_mlre $TCLSH '$MODULESHOME/libexec/modulecmd.tcl' fish autoinit | source -
 
 # clean temp variables used to setup quarantine
 set -e _mlre; set -e _mlv; set -e _mlrv;
-
-# no switchml definition since there is no Fish support in C version
-
-# setup ENV variables to get module defined in sub-shells (works for 'sh'
-# and 'ksh' in interactive mode and 'sh' (zsh-compat), 'bash' and 'ksh'
-# (zsh-compat) in non-interactive mode.
-# set -xg ENV /usr/share/Modules/init/profile.sh
-# set -xg BASH_ENV /usr/share/Modules/init/bash
-
-if not contains /usr/share/Modules/bin $PATH
-   set -xg PATH /usr/share/Modules/bin $PATH
-end
-
-set manpath (manpath 2>/dev/null)
-if not string match -q '*:/usr/share/man:*' :$manpath:
-   if [ -z $manpath ]
-      set -xg MANPATH /usr/share/man
-   else
-      set -xg MANPATH /usr/share/man:$manpath
-   end
-end
