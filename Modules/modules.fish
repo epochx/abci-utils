@@ -36,7 +36,7 @@ if not contains /usr/share/Modules/bin $PATH
    set -xg PATH /usr/share/Modules/bin $PATH
 end
 
-set manpath (manpath ^/dev/null)
+set manpath (manpath 2>/dev/null)
 if not string match -q '*:/usr/share/man:*' :$manpath:
    if [ -z $manpath ]
       set -xg MANPATH /usr/share/man

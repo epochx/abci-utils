@@ -3575,7 +3575,7 @@ $::g_shell '\"\$@\"'`;
          if {[isStderrTty]} {
             append fdef {end
 function module
-   _moduleraw $argv ^&1
+   _moduleraw $argv 2>&1
 end}
          } else {
             append fdef {end}
