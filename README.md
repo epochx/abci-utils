@@ -115,3 +115,7 @@ These tools add better completions to the following ABCI commands:
 ## Useful Links
 
 - [Enviroment Modules](http://modules.sourceforge.net/) [On Github](https://github.com/envmodules/modules)
+
+## Issues
+
+- Arrow keys not working in fish https://github.com/fish-shell/fish-shell/issues/2309
